@@ -1,3 +1,4 @@
+// components/ErrorBoundary.tsx
 import React, { ReactNode } from 'react';
 import * as Sentry from '@sentry/react';
 
@@ -15,29 +16,27 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, State> {
     this.state = { hasError: false };
   }
 
-  static getDerivedStateFromError(error: Error): State {
+  static getDerivedStateFromError(): State {
     return { hasError: true };
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    // Log to console (optional)
-    console.error({ error, errorInfo });
-    // Send to Sentry
-    Sentry.captureException(error, { extra: errorInfo });
+    console.error('Caught by ErrorBoundary:', error);
+    Sentry.captureException(error, { extra: { componentStack: errorInfo.componentStack } });
+
   }
 
   render() {
     if (this.state.hasError) {
       return (
-        <div>
-          <h2>Oops, there is an error!</h2>
+        <div style={{ padding: '2rem', textAlign: 'center' }}>
+          <h2>Oops, something went wrong!</h2>
           <button onClick={() => this.setState({ hasError: false })}>
             Try again?
           </button>
         </div>
       );
     }
-
     return this.props.children;
   }
 }
